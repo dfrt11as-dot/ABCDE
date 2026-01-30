@@ -1,9 +1,9 @@
-// Импортируем ethers напрямую через CDN для работы в браузере Cloudflare
-import { ethers } from 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js';
+// Используем стандартный импорт (Cloudflare соберет его сам)
+import { ethers } from 'ethers';
 
 export default {
   async fetch(request, env) {
-    // 1. Проверка метода (ждем только POST от TradingView)
+    // 1. Проверка метода
     if (request.method !== "POST") {
       return new Response("Бот запущен и ожидает сигналов от TradingView.", { status: 200 });
     }
@@ -20,19 +20,16 @@ export default {
       }
 
       // 4. Инициализация блокчейн-соединения
-      // Используем данные из переменных окружения Cloudflare
       const provider = new ethers.JsonRpcProvider(env.ALCHEMY_URL);
       const wallet = new ethers.Wallet(env.PRIVATE_KEY, provider);
 
       // 5. Логика обработки сигналов
-      const action = data.action.toLowerCase(); // buy или sell
+      const action = data.action ? data.action.toLowerCase() : ""; 
       const ticker = data.ticker || "ETHUSDC";
       const amount = data.amount_usd || "0";
 
       if (action === "buy") {
         console.log(`>>> Исполняю покупку ${ticker} на ${amount}$`);
-        // Здесь в следующей итерации мы добавим вызов функции swap()
-        // Пока возвращаем успех для теста связи
         return new Response(JSON.stringify({ status: "Success", message: "Buy order simulated" }), {
           headers: { "Content-Type": "application/json" }
         });
